@@ -95,7 +95,8 @@ class YarnApplicationFileUploader implements AutoCloseable {
             final Path homeDir,
             final List<Path> providedLibDirs,
             final ApplicationId applicationId,
-            final int fileReplication)
+            final int fileReplication,
+        Map<String, FileStatus> allFiles)
             throws IOException {
         this.fileSystem = checkNotNull(fileSystem);
         this.homeDir = checkNotNull(homeDir);
@@ -103,8 +104,7 @@ class YarnApplicationFileUploader implements AutoCloseable {
 
         this.localResources = new HashMap<>();
         this.applicationDir = getApplicationDir(applicationId);
-        this.providedSharedLibs = getAllFilesInProvidedLibDirs(providedLibDirs);
-
+        this.providedSharedLibs = getAllFilesInProvidedLibDirs(providedLibDirs,allFiles);
         this.remotePaths = new ArrayList<>();
         this.envShipResourceList = new ArrayList<>();
 
@@ -376,10 +376,21 @@ class YarnApplicationFileUploader implements AutoCloseable {
             final Path homeDirectory,
             final List<Path> providedLibDirs,
             final ApplicationId applicationId,
+            final int fileReplication,
+        Map<String, FileStatus> allFiles)
+            throws IOException {
+        return new YarnApplicationFileUploader(
+                fileSystem, homeDirectory, providedLibDirs, applicationId, fileReplication,allFiles);
+    }
+    static YarnApplicationFileUploader from(
+            final FileSystem fileSystem,
+            final Path homeDirectory,
+            final List<Path> providedLibDirs,
+            final ApplicationId applicationId,
             final int fileReplication)
             throws IOException {
         return new YarnApplicationFileUploader(
-                fileSystem, homeDirectory, providedLibDirs, applicationId, fileReplication);
+                fileSystem, homeDirectory, providedLibDirs, applicationId, fileReplication,new HashMap<>());
     }
 
     private Path copyToRemoteApplicationDir(
@@ -460,8 +471,10 @@ class YarnApplicationFileUploader implements AutoCloseable {
         return applicationDir;
     }
 
-    private Map<String, FileStatus> getAllFilesInProvidedLibDirs(final List<Path> providedLibDirs) {
+    private Map<String, FileStatus> getAllFilesInProvidedLibDirs(
+        final List<Path> providedLibDirs, Map<String, FileStatus> input) {
         final Map<String, FileStatus> allFiles = new HashMap<>();
+        allFiles.putAll(input);
         checkNotNull(providedLibDirs)
                 .forEach(
                         FunctionUtils.uncheckedConsumer(

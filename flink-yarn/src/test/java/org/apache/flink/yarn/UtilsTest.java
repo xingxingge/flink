@@ -34,6 +34,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -96,14 +97,18 @@ public class UtilsTest extends TestLogger {
 
     @Test
     public void testSharedLibWithNonQualifiedPath() throws Exception {
-        final String sharedLibPath = "/flink/sharedLib";
-        final String nonQualifiedPath = "hdfs://" + sharedLibPath;
-        final String defaultFs = "hdfs://localhost:9000";
+        final String sharedLibPath = "/tmp/flink/lib";
+        final String nonQualifiedPath = "hdfs://storage01:8020" + sharedLibPath;
+        final String defaultFs = "hdfs://storage01:8020";
         final String qualifiedPath = defaultFs + sharedLibPath;
 
+        String lib2 = "hdfs://storage01:8020/tmp/flink/deps";
+        List<String> list = new ArrayList<>();
+        list.add(qualifiedPath);
+        list.add(lib2);
         final Configuration flinkConfig = new Configuration();
         flinkConfig.set(
-                YarnConfigOptions.PROVIDED_LIB_DIRS, Collections.singletonList(nonQualifiedPath));
+                YarnConfigOptions.PROVIDED_LIB_DIRS, list);
         final YarnConfiguration yarnConfig = new YarnConfiguration();
         yarnConfig.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, defaultFs);
 
@@ -115,7 +120,7 @@ public class UtilsTest extends TestLogger {
 
     @Test
     public void testSharedLibIsNotRemotePathShouldThrowException() throws IOException {
-        final String localLib = "file:///flink/sharedLib";
+        final String localLib = "file:////e/develop/bigdata/flink-1.13.2/lib";
         final Configuration flinkConfig = new Configuration();
         flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Collections.singletonList(localLib));
 

@@ -75,13 +75,13 @@ under the License.
 			<version>${fs.oss.sdk.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-fs-hadoop-shaded</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-			<type>test-jar</type>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.apache.flink</groupId>-->
+			<!--<artifactId>flink-fs-hadoop-shaded</artifactId>-->
+			<!--<version>${project.version}</version>-->
+			<!--<scope>test</scope>-->
+			<!--<type>test-jar</type>-->
+		<!--</dependency>-->
 
 		<!-- for the behavior test suite -->
 		<dependency>
